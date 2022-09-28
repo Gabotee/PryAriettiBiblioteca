@@ -55,12 +55,13 @@ namespace PryAriettiBiblioteca
                 lstMostrarLibro.Items.Add(VecLibro[indiceRecorrido]);
                 // contador para q muestre todos los items 
                 indiceRecorrido++;
+                
             }
             else
             {
                 indiceRecorrido--;
                 MessageBox.Show("Llego a la ultima posicion");
-                cmdSiguiente.Enabled = false;
+                
             }
         }
 
@@ -76,7 +77,7 @@ namespace PryAriettiBiblioteca
             if (indiceRecorrido > -1 && VecLibro[indiceRecorrido] != null)
             {
                 lstMostrarLibro.Items.Add(VecLibro[indiceRecorrido]);
-
+                
             }
             else
             {
@@ -86,7 +87,7 @@ namespace PryAriettiBiblioteca
 
                 indiceRecorrido++;
 
-                cmdAtras.Enabled = false;
+                
             }
 
 
