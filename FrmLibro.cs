@@ -8,19 +8,29 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace PryAriettiBiblioteca
 {
-    
-
     public partial class FrmLibro : Form
     {
         //Vector 
-        string[] VecLibro = new string[21];
+
+        VecLibros[] vecBiblioteca = new VecLibros[21];
+
+        public int varIndice = 0;
 
         //Indice para recorrer el vector 
-        int indiceRecorrido = 0;
-        
+        int varIndiceRecorrido = 0;
+
+        public struct VecLibros
+        {
+            public string varCodigoLibro;
+            public string varNombre;
+            public string varCodigoEditorial;
+            public string varCodigoAutor;
+            public string varCodigoDistribuidor;
+        }
 
 
         public FrmLibro()
@@ -30,38 +40,47 @@ namespace PryAriettiBiblioteca
 
         private void FrmLibro_Load(object sender, EventArgs e)
         {
-            StreamReader srLibro = new StreamReader("./LIBRO.txt");
-
-            int IndiceVector = 0;
-
-            while (!srLibro.EndOfStream)
+            StreamReader objLectorLibros = new StreamReader("./LIBRO.txt");
+            while (!objLectorLibros.EndOfStream)
             {
-                //pasar datos a un Vector
+                string varLibro = objLectorLibros.ReadLine();
+                string[] vecLibros = varLibro.Split(',');
 
-                VecLibro[IndiceVector] = srLibro.ReadLine();
+                for (int pos = 0; pos < vecLibros.Length; pos++)
+                {
+                    //En la posicion del vector lo que hace es sacar los espacios en blanco y dejar solo el texto
+                    //Regex.Replace esa funcion hace que elimine los espacios en blanco
+                    vecLibros[pos] = Regex.Replace(vecLibros[pos], @"\t", "");
+                }
 
-                IndiceVector++;
+
+                vecBiblioteca[varIndice].varCodigoLibro = vecLibros[0];
+                vecBiblioteca[varIndice].varNombre = vecLibros[1];
+                vecBiblioteca[varIndice].varCodigoEditorial = vecLibros[2];
+                vecBiblioteca[varIndice].varCodigoAutor = vecLibros[3];
+                vecBiblioteca[varIndice].varCodigoDistribuidor = vecLibros[4];
+
+                NombreEditorial(varIndice);
+                NombreDistribuidora(varIndice);
+                varIndice++;
             }
-
-            srLibro.Close();
+            objLectorLibros.Close();
         }
 
         private void cmdSiguiente_Click(object sender, EventArgs e)
         {
-            //si el indice es menor a los espacios del vector y si es diferente de null (vacio)
-            if (indiceRecorrido < VecLibro.Length && VecLibro[indiceRecorrido] != null)
+            if (varIndiceRecorrido < vecBiblioteca.Length)
             {
-                // se muestran los items del vector en la listbox 
-                lstMostrarLibro.Items.Add(VecLibro[indiceRecorrido]);
-                // contador para q muestre todos los items 
-                indiceRecorrido++;
-                
+                txtCodigo.Text = vecBiblioteca[varIndiceRecorrido].varCodigoLibro;
+                txtNombre.Text = vecBiblioteca[varIndiceRecorrido].varNombre;
+                txtCodigoEditorial.Text = vecBiblioteca[varIndiceRecorrido].varCodigoEditorial;
+                txtCodigoAutor.Text = vecBiblioteca[varIndiceRecorrido].varCodigoAutor;
+                txtCodigoDistribuidor.Text = vecBiblioteca[varIndiceRecorrido].varCodigoDistribuidor;
+                varIndiceRecorrido++;
             }
-            else
+            if (varIndiceRecorrido == vecBiblioteca.Length)
             {
-                indiceRecorrido--;
-                MessageBox.Show("Llego a la ultima posicion");
-                
+                cmdSiguiente.Enabled = false;
             }
         }
 
@@ -72,25 +91,61 @@ namespace PryAriettiBiblioteca
 
         private void cmdAtras_Click(object sender, EventArgs e)
         {
-            indiceRecorrido--;
-
-            if (indiceRecorrido > -1 && VecLibro[indiceRecorrido] != null)
+            varIndiceRecorrido--;
+            if (varIndiceRecorrido >= 0)
             {
-                lstMostrarLibro.Items.Add(VecLibro[indiceRecorrido]);
-                
+                txtCodigo.Text = vecBiblioteca[varIndiceRecorrido].varCodigoLibro;
+                txtNombre.Text = vecBiblioteca[varIndiceRecorrido].varNombre;
+                txtCodigoEditorial.Text = vecBiblioteca[varIndiceRecorrido].varCodigoEditorial;
+                txtCodigoAutor.Text = vecBiblioteca[varIndiceRecorrido].varCodigoAutor;
+                txtCodigoDistribuidor.Text = vecBiblioteca[varIndiceRecorrido].varCodigoDistribuidor;
+                if (varIndiceRecorrido == 0)
+                {
+                    cmdAtras.Enabled = false;
+                }
+
             }
             else
             {
-
-
-                MessageBox.Show("Llego al primer registro");
-
-                indiceRecorrido++;
-
-                
+                cmdAtras.Enabled = false;
             }
 
+        }
 
+        private void NombreEditorial(int index)
+        {
+            StreamReader srLeerEditorial = new StreamReader("./EDITORIAL.txt");
+            while (!srLeerEditorial.EndOfStream)
+            {
+                string[] vecEditorial = srLeerEditorial.ReadLine().Split(',');
+                for (int pos = 0; pos < vecEditorial.Length; pos++)
+                {
+                    vecEditorial[pos] = Regex.Replace(vecEditorial[pos], @"\t", "");
+                }
+                if (vecEditorial[0] == vecBiblioteca[index].varCodigoEditorial)
+                {
+                    vecBiblioteca[index].varCodigoEditorial = vecEditorial[1];
+                }
+            }
+            srLeerEditorial.Close();
+        }
+
+        private void NombreDistribuidora(int index)
+        {
+            StreamReader srLeerDistribuidora = new StreamReader("./DISTRIBUIDORA.txt");
+            while (!srLeerDistribuidora.EndOfStream)
+            {
+                string[] vecDistribuidora = srLeerDistribuidora.ReadLine().Split(',');
+                for (int pos = 0; pos < vecDistribuidora.Length; pos++)
+                {
+                    vecDistribuidora[pos] = Regex.Replace(vecDistribuidora[pos], @"\t", "");
+                }
+                if (vecDistribuidora[0] == vecBiblioteca[index].varCodigoDistribuidor)
+                {
+                    vecBiblioteca[index].varCodigoDistribuidor = vecDistribuidora[1];
+                }
+            }
+            srLeerDistribuidora.Close();
         }
     }
 }
